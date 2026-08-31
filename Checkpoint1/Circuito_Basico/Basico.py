@@ -81,11 +81,11 @@ archivos_linea = [
 ]
 
 titulos_linea = {
-    'reg_linea_basico.txt': 'Regulación de línea',
-    'reglinea_3.3_basico.txt': 'Regulación de línea — $R_L$ = 3.3 $\Omega$',
-    'reglinea_6.8_basico.txt': 'Regulación de línea — $R_L$ = 6.8 $\Omega$',
-    'reglinea_25_basico.txt': 'Regulación de línea — $R_L$ = 25 $\Omega$',
-    'reglinea_50_basico.txt': 'Regulación de línea — $R_L$ = 50 $\Omega$'
+    'reg_linea_basico.txt': r'Regulación de línea',
+    'reglinea_3.3_basico.txt': r'Regulación de línea — $R_L$ = 3.3 $\Omega$',
+    'reglinea_6.8_basico.txt': r'Regulación de línea — $R_L$ = 6.8 $\Omega$',
+    'reglinea_25_basico.txt': r'Regulación de línea — $R_L$ = 25 $\Omega$',
+    'reglinea_50_basico.txt': r'Regulación de línea — $R_L$ = 50 $\Omega$'
 }
 
 for nombre in archivos_linea:
@@ -129,10 +129,10 @@ archivos_bode = [
 ]
 
 titulos_bode = {
-    'T_3.3ohm_basico.txt': '$R_L$ = 3.3 $\Omega$',
-    'T_6.8ohm_basico.txt': '$R_L$ = 6.8 $\Omega$',
-    'T_25ohm_basico.txt': '$R_L$ = 25 $\Omega$',
-    'T_50ohm_basico.txt': '$R_L$ = 50 $\Omega$'
+    'T_3.3ohm_basico.txt': r'$R_L$ = 3.3 $\Omega$',
+    'T_6.8ohm_basico.txt': r'$R_L$ = 6.8 $\Omega$',
+    'T_25ohm_basico.txt': r'$R_L$ = 25 $\Omega$',
+    'T_50ohm_basico.txt': r'$R_L$ = 50 $\Omega$'
 }
 
 for nombre in archivos_bode:
