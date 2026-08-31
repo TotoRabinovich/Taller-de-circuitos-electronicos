@@ -1,0 +1,35 @@
+* A:\FIUBA\Circuitos II\Checkpoint_1\Circuito_Final\Circuito_Final.asc
+VREG N001 0 9.5
+Q1 N002 VREF N009 0 BC547C
+Q2 N004 N007 N009 0 BC547C
+Rf1 N008 0 10k
+Rf2 Vo N008 10k
+VREF VREF 0 2.5
+Q3 N009 N010 0 0 BC547C
+Q4 N010 N010 0 0 BC547C
+Rref VREF N010 1k2
+Q5 N002 N002 N001 0 BC557C
+Q6 N004 N002 N001 0 BC557C
+Q7 N005 N003 N001 0 TIP42C
+Q8 N003 N004 N005 0 BC337-40
+Vpb vb9 0 1
+Q9 vc9 vb9 ve9 0 TIP42C
+V1 ve9 0 12
+R1 vc9 0 2
+Q10 N004 N006 Vo 0 BC547C
+R4 N005 Vo 2.2
+R5 N006 0 1k8
+R6 N005 N006 1k
+Rl Vo 0 3.3
+L1 N007 N008 1
+Vp1 Vp 0 AC 1
+C2 N007 Vp 1
+.model NPN NPN
+.model PNP PNP
+.lib C:\Users\User\AppData\Local\LTspice\lib\cmp\standard.bjt
+.include TIP42C.lib
+* .op
+.ac dec 200 0.1 1e9
+* .dc I1 0.1 1.5 0.01
+.backanno
+.end
