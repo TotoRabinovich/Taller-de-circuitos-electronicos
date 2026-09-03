@@ -132,7 +132,7 @@ def marcar_inicio_regulacion(eje_x, eje_y, nombre_variable):
 
     plt.axvline(x=x_reg, color='red', linestyle='--', linewidth=1)
 
-    texto = 'empieza a regular\n' + nombre_variable + ' = ' + str(round(x_reg, 2))
+    texto =  nombre_variable + ' = ' + str(round(x_reg, 2))
     plt.annotate(texto, xy=(x_reg, y_reg), xytext=(10, -30),
                  textcoords='offset points', fontsize=9,
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='mistyrose',
@@ -170,7 +170,7 @@ def marcar_frecuencia_corte(frecuencia, magnitud_lineal):
     plt.axvline(x=f_corte, color='red', linestyle='--', linewidth=1)
     plt.plot(f_corte, mag_corte, marker='o', color='red', markersize=6, zorder=5)
 
-    texto = 'f_corte ≈ ' + '{:.2e}'.format(f_corte) + ' Hz'
+    texto =  '{:.2e}'.format(f_corte) + ' Hz'
     plt.annotate(texto, xy=(f_corte, mag_corte), xytext=(10, 15),
                  textcoords='offset points', fontsize=9,
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='mistyrose',
@@ -179,18 +179,17 @@ def marcar_frecuencia_corte(frecuencia, magnitud_lineal):
 
 # --- regulación de línea: un gráfico por archivo ---
 archivos_linea = [
-    'reglinea_3.3_intermedio.txt',
-    'reglinea_6.8_intermedio.txt',
-    'reglinea_25_intermedio.txt',
-    'reglinea_50_intermedio.txt'
+    'reglinea_4ohm_final.txt',
+    'reglinea_6.8ohm_final.txt',
+    'reglinea_25ohm_final.txt',
+    'reglinea_50ohm_final.txt'
 ]
 
 titulos_linea = {
-    'reg_linea_intermedio.txt': r'Regulación de línea',
-    'reglinea_3.3_intermedio.txt': r'Regulación de línea — $R_L$ = 3.3 $\Omega$',
-    'reglinea_6.8_intermedio.txt': r'Regulación de línea — $R_L$ = 6.8 $\Omega$',
-    'reglinea_25_intermedio.txt': r'Regulación de línea — $R_L$ = 25 $\Omega$',
-    'reglinea_50_intermedio.txt': r'Regulación de línea — $R_L$ = 50 $\Omega$'
+    'reglinea_4ohm_final.txt': r'Regulación de línea — $R_L$ = 3.3 $\Omega$',
+    'reglinea_6.8ohm_final.txt': r'Regulación de línea — $R_L$ = 6.8 $\Omega$',
+    'reglinea_25ohm_final.txt': r'Regulación de línea — $R_L$ = 25 $\Omega$',
+    'reglinea_50ohm_final.txt': r'Regulación de línea — $R_L$ = 50 $\Omega$'
 }
 
 for nombre in archivos_linea:
@@ -218,7 +217,7 @@ for nombre in archivos_linea:
 
 
 # --- regulación de carga ---
-rl, vo = leer_regulacion(ruta_dato('regcarga_intermedio.txt'))
+rl, vo = leer_regulacion(ruta_dato('regcarga_final.txt'))
 
 plt.figure(figsize=(11, 6))
 plt.plot(rl, vo, color='tab:orange', label='V(vo)')
@@ -241,17 +240,22 @@ plt.close()
 
 # --- Bode: magnitud y fase separados, un gráfico por archivo ---
 archivos_bode = [
-    'T_3.3ohm_intermedio.txt',
-    'T_6.8ohm_intermedio.txt',
-    'T_25ohm_intermedio.txt',
-    'T_50ohm_intermedio.txt'
+    'T(af)_4ohm_conRE.txt',
+    'T(af)_3.3ohm_conRE.txt',
+    'T(af)_50ohm_conRE.txt',
+    'T(af)_4ohm_sinRE.txt',
+    'T(af)_3.3ohm_sinRE.txt',
+    'T(af)_50ohm_sinRE.txt'
 ]
 
 titulos_bode = {
-    'T_3.3ohm_intermedio.txt': r'$R_L$ = 3.3 $\Omega$',
-    'T_6.8ohm_intermedio.txt': r'$R_L$ = 6.8 $\Omega$',
-    'T_25ohm_intermedio.txt': r'$R_L$ = 25 $\Omega$',
-    'T_50ohm_intermedio.txt': r'$R_L$ = 50 $\Omega$'
+    'T(af)_4ohm_conRE.txt': r'$R_L$ = 4 $\Omega$',
+    'T(af)_3.3ohm_conRE.txt': r'$R_L$ = 3.3 $\Omega$',
+    'T(af)_50ohm_conRE.txt': r'$R_L$ = 50 $\Omega$',
+    'T(af)_4ohm_sinRE.txt':r'$R_L$ = 4 $\Omega$',
+    'T(af)_3.3ohm_sinRE.txt': r'$R_L$ = 3.3 $\Omega$',
+    'T(af)_50ohm_sinRE.txt': r'$R_L$ = 50 $\Omega$',
+    'T(af)_50ohm_sinRE.txt': r'$R_L$ = 50 $\Omega$'
 }
 
 for nombre in archivos_bode:
@@ -280,3 +284,35 @@ for nombre in archivos_bode:
     plt.savefig(os.path.join(carpeta_graficos, nombre_salida_mag), dpi=150)
     plt.close()
 
+# --- foldback: curva de protección Vo vs Io ---
+rl_fb, vo_fb = leer_regulacion(ruta_dato('foldback.txt'))
+
+# la corriente de salida se calcula como Io = Vo / RL (ley de ohm sobre la carga)
+io_fb = vo_fb / rl_fb
+
+plt.figure(figsize=(11, 6))
+plt.plot(io_fb, vo_fb, color='tab:red', label='V(vo)')
+plt.xlabel(r'$I_{o}$ [A]')
+plt.ylabel(r'$V_{o}$ [V]')
+plt.title('Protección por Foldback')
+plt.grid(True, which='major', color='gray', linewidth=0.6)
+plt.minorticks_on()
+plt.grid(True, which='minor', color='gray', linewidth=0.3, alpha=0.5)
+plt.legend()
+
+# marcamos el pico de corriente: el punto donde empieza a "doblarse"
+indice_pico = np.argmax(io_fb)
+io_pico = io_fb[indice_pico]
+vo_pico = vo_fb[indice_pico]
+
+plt.plot(io_pico, vo_pico, marker='o', color='black', markersize=6, zorder=5)
+texto_pico = 'Io máx ≈ ' + str(round(io_pico, 3)) + ' A'
+plt.annotate(texto_pico, xy=(io_pico, vo_pico), xytext=(10, 10),
+             textcoords='offset points', fontsize=9,
+             bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
+                       edgecolor='gray', alpha=0.9))
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(carpeta_graficos, 'foldback.png'), dpi=150)
+plt.close()
