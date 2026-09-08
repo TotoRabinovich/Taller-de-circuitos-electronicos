@@ -165,27 +165,35 @@ def marcar_punto_maximo(eje_x, eje_y, unidad_y):
 
 # función para encontrar el punto donde la curva ya alcanzó su valor final
 # (dentro de una tolerancia) y se queda ahí, sin volver a alejarse
-def encontrar_inicio_regulacion(eje_x, eje_y, tolerancia=0.01):
-    valor_final = eje_y[-1]
+# def encontrar_inicio_regulacion(eje_x, eje_y, tolerancia=0.01):
+#     valor_final = eje_y[-1]
+
+#     for i in range(len(eje_y)):
+#         diferencia = abs(eje_y[i] - valor_final)
+#         if abs(valor_final) > 1e-12:
+#             diferencia_relativa = diferencia / abs(valor_final)
+#         else:
+#             diferencia_relativa = diferencia
+
+#         if diferencia_relativa <= tolerancia:
+#             # verificamos que desde aca en adelante se mantenga cerca del
+#             # valor final (para no confundir un cruce de paso con el
+#             # aplanamiento real)
+#             resto = eje_y[i:]
+#             diferencias_resto = np.abs(resto - valor_final)
+#             if abs(valor_final) > 1e-12:
+#                 diferencias_resto = diferencias_resto / abs(valor_final)
+
+#             if np.all(diferencias_resto <= tolerancia * 3):
+#                 return eje_x[i], eje_y[i]
+
+#     return None, None
+def encontrar_inicio_regulacion(eje_x, eje_y):
+    # Se considera que comienza la regulación cuando Vo alcanza 4.9 V
 
     for i in range(len(eje_y)):
-        diferencia = abs(eje_y[i] - valor_final)
-        if abs(valor_final) > 1e-12:
-            diferencia_relativa = diferencia / abs(valor_final)
-        else:
-            diferencia_relativa = diferencia
-
-        if diferencia_relativa <= tolerancia:
-            # verificamos que desde aca en adelante se mantenga cerca del
-            # valor final (para no confundir un cruce de paso con el
-            # aplanamiento real)
-            resto = eje_y[i:]
-            diferencias_resto = np.abs(resto - valor_final)
-            if abs(valor_final) > 1e-12:
-                diferencias_resto = diferencias_resto / abs(valor_final)
-
-            if np.all(diferencias_resto <= tolerancia * 3):
-                return eje_x[i], eje_y[i]
+        if eje_y[i] >= 4.9:
+            return eje_x[i], eje_y[i]
 
     return None, None
 
@@ -253,13 +261,13 @@ def marcar_frecuencia_corte(frecuencia, magnitud_lineal):
 # --- regulación de línea: un gráfico por archivo ---
 archivos_linea = [
     'reglinea_3.4ohm_foldback.txt',
-    'reglinea_4ohm_foldback.txt',
+    'reglinea_25ohm_foldback.txt',
     'reglinea_50ohm_foldback.txt'
 ]
 
 titulos_linea = {
     'reglinea_3.4ohm_foldback.txt': r'Regulación de línea — $R_L$ = 3.4 $\Omega$',
-    'reglinea_4ohm_foldback.txt': r'Regulación de línea — $R_L$ = 4 $\Omega$',
+    'reglinea_25ohm_foldback.txt': r'Regulación de línea — $R_L$ = 25 $\Omega$',
     'reglinea_50ohm_foldback.txt': r'Regulación de línea — $R_L$ = 50 $\Omega$'
 }
 
