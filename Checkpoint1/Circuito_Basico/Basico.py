@@ -1,10 +1,35 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import re
 import os
 
-# estilo general para que los graficos se vean mas prolijos
+# --- estilo general "prolijo / académico", para que se vean bien en el informe ---
 plt.style.use('default')
+
+plt.rcParams.update({
+    'font.size': 12,            # texto general un poco más grande que el default
+    'axes.titlesize': 14,       # título de cada gráfico
+    'axes.titleweight': 'bold',
+    'axes.labelsize': 12,       # etiquetas de los ejes
+    'legend.fontsize': 10,
+    'figure.facecolor': 'white',
+    'axes.facecolor': 'white',
+    'axes.edgecolor': '#444444',
+    'axes.linewidth': 1.0,
+    'xtick.color': '#333333',
+    'ytick.color': '#333333',
+})
+
+# paleta de colores fija para que cada tipo de curva se vea siempre igual
+COLOR_LINEA = '#1f6f9c'      # azul
+COLOR_CARGA = '#d97b29'      # naranja
+COLOR_BODE = '#2e8b57'       # verde
+
+# formateador para mostrar los numeros de frecuencia abreviados (1k, 10k, 1M, etc)
+formateador_frecuencia = mticker.EngFormatter(unit='Hz', sep=' ')
+# mismo formateador pero forzando 3 decimales, para la anotación de fc
+formateador_frecuencia_3dec = mticker.EngFormatter(unit='Hz', sep=' ', places=3)
 
 # carpeta donde esta este script, y subcarpetas Data / Graficos adentro
 carpeta_script = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +44,47 @@ if not os.path.exists(carpeta_graficos):
 # función chiquita para armar la ruta completa de un archivo de datos
 def ruta_dato(nombre_archivo):
     return os.path.join(carpeta_datos, nombre_archivo)
+
+
+# función para formatear un valor numérico con hasta 3 decimales,
+# sacando los ceros finales que no aportan nada (ej: "6.000" -> "6",
+# "5.030" -> "5.03"), y agregarle la unidad correspondiente
+def formatear_valor(valor, unidad=''):
+    texto_numero = quitar_ceros_finales('%.3f' % valor)
+
+    if unidad:
+        return texto_numero + ' ' + unidad
+    return texto_numero
+
+
+# función chiquita que le saca los ceros finales (y el punto, si sobra)
+# a un numero ya formateado como texto, ej "6.000" -> "6", "5.030" -> "5.03"
+def quitar_ceros_finales(texto_numero):
+    if '.' in texto_numero:
+        texto_numero = texto_numero.rstrip('0').rstrip('.')
+    return texto_numero
+
+
+# función que le da a cada gráfico el mismo look: bordes limpios y grilla suave
+def aplicar_estilo_ejes(ax=None):
+    if ax is None:
+        ax = plt.gca()
+
+    # sacamos el marco de arriba y de la derecha (look más "paper", menos "excel")
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.grid(True, which='major', color='gray', linewidth=0.6, alpha=0.5)
+    ax.minorticks_on()
+    ax.grid(True, which='minor', color='gray', linewidth=0.3, alpha=0.25)
+
+
+# función para que el eje x de un gráfico de frecuencia muestre "1k", "10k", "1M"
+# en vez de notacion cientifica tipo "1e4"
+def formatear_eje_frecuencia(ax=None):
+    if ax is None:
+        ax = plt.gca()
+    ax.xaxis.set_major_formatter(formateador_frecuencia)
 
 
 # función para leer archivos de regulación (línea y carga): dos columnas separadas por tabulador
@@ -83,7 +149,7 @@ def marcar_punto_maximo(eje_x, eje_y, unidad_y):
 
     plt.plot(x_max, y_max, marker='o', color='black', markersize=6, zorder=5)
 
-    texto = 'máx: ' + str(round(y_max, 3)) + ' ' + unidad_y
+    texto = 'máx: ' + formatear_valor(y_max, unidad_y)
     plt.annotate(texto, xy=(x_max, y_max), xytext=(-10, 15),
                  textcoords='offset points', fontsize=9,
                  ha='right',
@@ -144,19 +210,19 @@ def encontrar_inicio_regulacion(eje_x, eje_y):
 
 
 # función para marcar en el gráfico el punto donde empieza a regular
-def marcar_inicio_regulacion(eje_x, eje_y, nombre_variable):
+def marcar_inicio_regulacion(eje_x, eje_y, nombre_variable, unidad_x=''):
     x_reg, y_reg = encontrar_inicio_regulacion(eje_x, eje_y)
 
     if x_reg is None:
         return
 
-    plt.axvline(x=x_reg, color='red', linestyle='--', linewidth=1)
+    plt.axvline(x=x_reg, color='#c0392b', linestyle='--', linewidth=1.2)
 
-    texto = nombre_variable + ' = ' + str(round(x_reg, 2))
+    texto = nombre_variable + ' = ' + formatear_valor(x_reg, unidad_x)
     plt.annotate(texto, xy=(x_reg, y_reg), xytext=(10, -30),
                  textcoords='offset points', fontsize=9,
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='mistyrose',
-                           edgecolor='red', alpha=0.9))
+                           edgecolor='#c0392b', alpha=0.9))
 
 
 # función para encontrar la frecuencia de corte (donde |T| cae a maximo/raiz(2))
@@ -187,14 +253,20 @@ def marcar_frecuencia_corte(frecuencia, magnitud_lineal):
     if f_corte is None:
         return
 
-    plt.axvline(x=f_corte, color='red', linestyle='--', linewidth=1)
-    plt.plot(f_corte, mag_corte, marker='o', color='red', markersize=6, zorder=5)
+    plt.axvline(x=f_corte, color='#c0392b', linestyle='--', linewidth=1.2)
+    plt.plot(f_corte, mag_corte, marker='o', color='#c0392b', markersize=6, zorder=5)
 
-    texto = 'f_corte ≈ ' + '{:.2e}'.format(f_corte) + ' Hz'
+    # antes decia algo como "f_corte ≈ 2.11e+05 Hz", ahora usamos el mismo
+    # formato abreviado que el eje x (1k, 10k, 1M, etc), con 3 decimales
+    # fijos, sacando los ceros finales que sobren
+    texto_frecuencia = formateador_frecuencia_3dec(f_corte)
+    partes_frecuencia = texto_frecuencia.split(' ')
+    partes_frecuencia[0] = quitar_ceros_finales(partes_frecuencia[0])
+    texto = r'$f_c$ = ' + ' '.join(partes_frecuencia)
     plt.annotate(texto, xy=(f_corte, mag_corte), xytext=(10, 15),
                  textcoords='offset points', fontsize=9,
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='mistyrose',
-                           edgecolor='red', alpha=0.9))
+                           edgecolor='#c0392b', alpha=0.9))
 
 
 # --- regulación de línea: un gráfico por archivo ---
@@ -206,7 +278,6 @@ archivos_linea = [
 ]
 
 titulos_linea = {
-    'reg_linea_basico.txt': r'Regulación de línea',
     'reglinea_3.3_basico.txt': r'Regulación de línea — $R_L$ = 3.3 $\Omega$',
     'reglinea_6.8_basico.txt': r'Regulación de línea — $R_L$ = 6.8 $\Omega$',
     'reglinea_25_basico.txt': r'Regulación de línea — $R_L$ = 25 $\Omega$',
@@ -216,23 +287,21 @@ titulos_linea = {
 for nombre in archivos_linea:
     vreg, vo = leer_regulacion(ruta_dato(nombre))
 
-    plt.figure(figsize=(11, 6))
-    plt.plot(vreg, vo, color='tab:blue', label='V(vo)')
+    plt.figure(figsize=(9, 5.5))
+    plt.plot(vreg, vo, color=COLOR_LINEA, linewidth=2, label='V(vo)')
     plt.xlabel(r'$V_{reg}$ [V]')
     plt.ylabel(r'$V_{o}$ [V]')
     plt.title(titulos_linea[nombre])
-    plt.grid(True, which='major', color='gray', linewidth=0.6)
-    plt.minorticks_on()
-    plt.grid(True, which='minor', color='gray', linewidth=0.3, alpha=0.5)
-    plt.legend()
+    aplicar_estilo_ejes()
+    plt.legend(frameon=False)
 
-    marcar_inicio_regulacion(vreg, vo, r'$V_{reg}$')
+    marcar_inicio_regulacion(vreg, vo, r'$V_{reg}$', 'V')
     marcar_punto_maximo(vreg, vo, 'V')
 
     plt.tight_layout()
 
     nombre_salida = nombre.replace('.txt', '.png')
-    plt.savefig(os.path.join(carpeta_graficos, nombre_salida), dpi=150)
+    plt.savefig(os.path.join(carpeta_graficos, nombre_salida), dpi=200)
 
     plt.close()
 
@@ -240,22 +309,20 @@ for nombre in archivos_linea:
 # --- regulación de carga ---
 rl, vo = leer_regulacion(ruta_dato('regcarga_basico.txt'))
 
-plt.figure(figsize=(11, 6))
-plt.plot(rl, vo, color='tab:orange', label='V(vo)')
+plt.figure(figsize=(9, 5.5))
+plt.plot(rl, vo, color=COLOR_CARGA, linewidth=2, label='V(vo)')
 plt.xlabel(r'$R_L$ [$\Omega$]')
 plt.ylabel(r'$V_{o}$ [V]')
 plt.title('Regulación de carga')
-plt.grid(True, which='major', color='gray', linewidth=0.6)
-plt.minorticks_on()
-plt.grid(True, which='minor', color='gray', linewidth=0.3, alpha=0.5)
-plt.legend()
+aplicar_estilo_ejes()
+plt.legend(frameon=False)
 
-marcar_inicio_regulacion(rl, vo, r'$R_L$')
+marcar_inicio_regulacion(rl, vo, r'$R_L$', 'Ω')
 marcar_punto_maximo(rl, vo, 'V')
 
 plt.tight_layout()
 
-plt.savefig(os.path.join(carpeta_graficos, 'regulacion_carga.png'), dpi=150)
+plt.savefig(os.path.join(carpeta_graficos, 'regulacion_carga.png'), dpi=200)
 plt.close()
 
 
@@ -281,15 +348,14 @@ for nombre in archivos_bode:
     magnitud_lineal = 10 ** (magnitud_db / 20)
 
     # magnitud en lineal
-    plt.figure(figsize=(11, 6))
-    plt.semilogx(frecuencia, magnitud_lineal, color='tab:green', label='|T|')
+    plt.figure(figsize=(9, 5.5))
+    plt.semilogx(frecuencia, magnitud_lineal, color=COLOR_BODE, linewidth=2, label='|T|')
     plt.xlabel('Frecuencia [Hz]')
     plt.ylabel('|T|')
     plt.title('Ganancia de lazo ' + titulos_bode[nombre])
-    plt.grid(True, which='major', color='gray', linewidth=0.6)
-    plt.minorticks_on()
-    plt.grid(True, which='minor', color='gray', linewidth=0.3, alpha=0.5)
-    plt.legend()
+    aplicar_estilo_ejes()
+    formatear_eje_frecuencia()
+    plt.legend(frameon=False)
 
     marcar_punto_maximo(frecuencia, magnitud_lineal, '')
     marcar_frecuencia_corte(frecuencia, magnitud_lineal)
@@ -297,6 +363,5 @@ for nombre in archivos_bode:
     plt.tight_layout()
 
     nombre_salida_mag = nombre.replace('.txt', '_magnitud.png')
-    plt.savefig(os.path.join(carpeta_graficos, nombre_salida_mag), dpi=150)
+    plt.savefig(os.path.join(carpeta_graficos, nombre_salida_mag), dpi=200)
     plt.close()
-
