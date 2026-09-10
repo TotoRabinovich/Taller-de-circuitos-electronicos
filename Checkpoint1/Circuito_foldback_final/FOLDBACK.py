@@ -26,6 +26,8 @@ COLOR_LINEA = '#1f6f9c'      # azul
 COLOR_CARGA = '#d97b29'      # naranja
 COLOR_BODE = '#2e8b57'       # verde
 COLOR_FOLDBACK = '#c0392b'   # rojo
+COLOR_EFICIENCIA = '#8e44ad'  # violeta
+
 
 # formateador para mostrar los numeros de frecuencia abreviados (1k, 10k, 1M, etc)
 formateador_frecuencia = mticker.EngFormatter(unit='Hz', sep=' ')
@@ -151,9 +153,19 @@ def marcar_punto_maximo(eje_x, eje_y, unidad_y):
     plt.plot(x_max, y_max, marker='o', color='black', markersize=6, zorder=5)
 
     texto = 'máx: ' + formatear_valor(y_max, unidad_y)
-    plt.annotate(texto, xy=(x_max, y_max), xytext=(-10, 15),
+
+    # si el punto esta cerca del borde izquierdo del grafico, la etiqueta va
+    # hacia la derecha en vez de hacia la izquierda, para que no se corte
+    # contra el eje
+    rango_x = eje_x.max() - eje_x.min()
+    if rango_x > 0 and (x_max - eje_x.min()) < rango_x * 0.15:
+        offset_x, alineacion = 10, 'left'
+    else:
+        offset_x, alineacion = -10, 'right'
+
+    plt.annotate(texto, xy=(x_max, y_max), xytext=(offset_x, 15),
                  textcoords='offset points', fontsize=9,
-                 ha='right',
+                 ha=alineacion,
                  bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
                            edgecolor='gray', alpha=0.9))
 
@@ -312,6 +324,49 @@ plt.tight_layout()
 plt.savefig(os.path.join(carpeta_graficos, 'regulacion_foldback.png'), dpi=200)
 plt.close()
 
+# --- regulación de carga ---
+rl, vo = leer_regulacion(ruta_dato('regcarga_foldback.txt'))
+
+plt.figure(figsize=(9, 5.5))
+plt.plot(rl, vo, color=COLOR_CARGA, linewidth=2, label='V(vo)')
+plt.xlabel(r'$R_L$ [$\Omega$]')
+plt.ylabel(r'$V_{o}$ [V]')
+plt.title('Regulación de carga')
+aplicar_estilo_ejes()
+plt.legend(frameon=False)
+
+marcar_inicio_regulacion(rl, vo, r'$R_L$')
+marcar_punto_maximo(rl, vo, 'V')
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(carpeta_graficos, 'regulacion_foldback.png'), dpi=200)
+plt.close()
+
+
+# --- eficiencia: V(vo)/vreg en función de vreg ---
+vreg_efi, eficiencia = leer_regulacion(ruta_dato('eficiencia.txt'))
+
+# el archivo trae la eficiencia como fraccion (0 a 1), la pasamos a porcentaje
+eficiencia_pct = eficiencia * 100
+
+plt.figure(figsize=(9, 5.5))
+plt.plot(vreg_efi, eficiencia_pct, color=COLOR_EFICIENCIA, linewidth=2, label=r'$V_o / V_{reg}$')
+plt.xlabel(r'$V_{reg}$ [V]')
+plt.ylabel('Eficiencia [%]')
+plt.title('Eficiencia')
+aplicar_estilo_ejes()
+plt.legend(frameon=False)
+
+marcar_punto_maximo(vreg_efi, eficiencia_pct, '%')
+
+# un poco de aire a la izquierda tambien, asi el punto no queda pegado al eje
+plt.margins(x=0.03)
+
+plt.tight_layout()
+
+plt.savefig(os.path.join(carpeta_graficos, 'eficiencia.png'), dpi=200)
+plt.close()
 
 # --- Bode: magnitud y fase separados, un gráfico por archivo ---
 archivos_bode = [
