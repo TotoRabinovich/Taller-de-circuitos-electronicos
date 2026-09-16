@@ -1,8 +1,8 @@
 (export
 	(version "E")
 	(design
-		(source "C:\\Users\\totor\\OneDrive\\Desktop\\Taller de circuitos electronicos\\Checkpoint1\\Esquematico\\esquematico.kicad_sch")
-		(date "2026-09-15T00:01:04")
+		(source "C:\\Users\\totor\\OneDrive\\Desktop\\Taller de circuitos electronicos\\Checkpoint2\\Esquematico\\esquematico.kicad_sch")
+		(date "2026-09-16T14:16:14")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -1665,11 +1665,11 @@
 		(comp
 			(ref "RS1")
 			(value "0.1")
-			(footprint "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal")
+			(footprint "Resistor_THT:R_Axial_Power_L25.0mm_W6.4mm_P27.94mm")
 			(description "Resistor")
 			(fields
 				(field
-					(name "Footprint") "Resistor_THT:R_Axial_DIN0309_L9.0mm_D3.2mm_P12.70mm_Horizontal")
+					(name "Footprint") "Resistor_THT:R_Axial_Power_L25.0mm_W6.4mm_P27.94mm")
 				(field
 					(name "Datasheet")
 				)

@@ -1,0 +1,6 @@
+LTspice 26.0.2 for Windows
+Circuit: C:\Users\totor\OneDrive\Desktop\Taller de circuitos electronicos\Checkpoint2\Simulaciones\Circuito_foldback_final.net
+Start Time: Tue Sep 15 22:03:38 2026
+C:\Users\totor\OneDrive\Desktop\Taller de circuitos electronicos\Checkpoint2\Simulaciones\Circuito_foldback_final.net(17): No such parameter defined.
+Rl Vo 0 {RL}
+         ^^
